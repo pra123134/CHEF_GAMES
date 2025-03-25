@@ -85,75 +85,82 @@ if len(data["Day"]) < num_dishes:
 
 menu_df = pd.DataFrame(data)
 
-def suggest_leftover_recipes_gemini(leftover_ingredients):
-    prompt = f"""
-    Suggest 5 creative dish names and recipes based on the following leftover ingredients:
-    Leftover Ingredients: {', '.join(leftover_ingredients)}
-    Provide the output in a list of dictionary, with name and recipe as keys.
-    """
-    try:
-        response = get_ai_response(prompt)
-        return ast.literal_eval(response)
-    except (ValueError, SyntaxError) as e:
-        st.error(f"Error generating leftover recipes: {e}, Response: {response}")
-        return []
-    except Exception as e:
-        st.error(f"Error generating leftover recipes: {e}")
-        return []
-
+# Helper functions
 def evaluate_recipe_name(recipe_name):
     prompt = f"""
     Evaluate the following recipe name for creativity, newness, and how reasonable it is: "{recipe_name}".
     Provide a score from 1 to 10 (10 being the best) and a brief reason for the score.
-    Return the score and reason as a comma-separated string.
-    For example:
-    7, The recipe is original and uses common ingredients
     """
-    response_text = get_ai_response(prompt)
-    parts = response_text.split(",", 1)
-    if len(parts) == 2:
-        try:
+    try:
+        response = model.generate_content(prompt)
+        response_text = response.text.strip()
+        parts = response_text.split(",", 1)
+        if len(parts) == 2:
             score = int(parts[0].strip())
             reason = parts[1].strip()
             return {"score": score, "reason": reason}
-        except ValueError:
-            st.error(f"ValueError: Could not parse score as integer, Response: {response_text}")
+        else:
             return {"score": 0, "reason": "Could not parse response"}
-    else:
-        st.error(f"Could not parse response: {response_text}")
-        return {"score": 0, "reason": "Could not parse response"}
+    except Exception as e:
+        return {"score": 0, "reason": f"Error: {e}"}
+
+
+def suggest_leftover_recipes_gemini(leftover_ingredients):
+    prompt = f"""
+    Suggest 5 creative dish names and recipes based on the following leftover ingredients:
+    {', '.join(leftover_ingredients)}
+    Provide the output as a list of dictionaries with "name" and "recipe" keys.
+    """
+    try:
+        response = model.generate_content(prompt)
+        return ast.literal_eval(response.text)
+    except Exception as e:
+        return [{"name": "Error", "recipe": str(e)}]
+
 
 def save_game_results_to_csv(recipe_names, filename):
     filepath = os.path.join(os.getcwd(), filename)
-    with open(filepath, 'w', newline='', encoding='utf-8') as csvfile:
+    current_date = datetime.date.today().strftime("%Y-%m-%d")
+    with open(filepath, "w", newline="", encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(["Chef Name", "Recipe Name", "Score", "Reason", "Ingredients"])
+        writer.writerow(["Chef Name", "Recipe Name", "Score", "Reason", "Ingredients", "Date"])
         for chef, data in recipe_names.items():
-            writer.writerow([chef, data['recipe'], data['score'], data['reason'], data['ingredients']])
-    st.success(f"Results saved to {filename}")
+            writer.writerow([chef, data["recipe"], data["score"], data["reason"], data["ingredients"], current_date])
 
 def display_leaderboard_from_csv(filename):
     filepath = os.path.join(os.getcwd(), filename)
     try:
         df = pd.read_csv(filepath)
-        st.subheader(f"{filename.replace('results.csv', '').replace('', ' ').title()} Leaderboard")
-        for _, row in df.iterrows():
-            st.write(f"**{row['Chef Name']}:**")
-            st.write(f"- Recipe: {row['Recipe Name']}")
-            st.write(f"- Score: {row['Score']}")
-            st.write(f"- Reason: {row['Reason']}")
-            st.write(f"- Ingredients: {row['Ingredients']}")
+        st.write("### Leaderboard")
+        st.dataframe(df)
     except FileNotFoundError:
-        st.warning(f"File {filename} not found.")
+        st.error("Leaderboard file not found.")
 
-def chef_recipe_contest():
-    st.subheader("Recipe Naming Contest")
-    chefs = st.text_input("Enter chef names (comma-separated):")
-    if st.button("Start Contest"):
-        chefs_list = [chef.strip() for chef in chefs.split(",")]
-        recipe_names = {}
-        for chef_name in chefs_list:
-            ingredient_list = random.choice(menu_df['Ingredients'])
-            st.write(f"{chef_name}, your ingredients are: {ingredient_list}")
-            recipe_name = st.text_input("Suggest a recipe name:", key=f"recipe_{chef_name}")
-            if st.button("Submit", key=f"submit_{chef_name}"):
+# Streamlit UI
+st.title("Chef Recipe Challenge")
+st.sidebar.title("Game Menu")
+menu_option = st.sidebar.selectbox("Select an option", ["Recipe Naming Contest", "Leftover Challenge", "Display Leaderboard"])
+
+if menu_option == "Recipe Naming Contest":
+    st.header("Recipe Naming Contest")
+    chef_name = st.text_input("Enter your name")
+    if st.button("Get Ingredients"):
+        ingredient_list = random.choice(menu_df["Ingredients"])
+        st.write(f"Your ingredients are: **{ingredient_list}**")
+        recipe_name = st.text_input("Suggest a recipe name")
+        if st.button("Submit Recipe"):
+            evaluation = evaluate_recipe_name(recipe_name)
+            st.write(f"Score: {evaluation['score']}")
+            st.write(f"Reason: {evaluation['reason']}")
+elif menu_option == "Leftover Challenge":
+    st.header("Leftover Challenge")
+    chef_name = st.text_input("Enter your name")
+    leftover_ingredients = st.text_input("Enter leftover ingredients (comma-separated)")
+    if st.button("Get Suggestions"):
+        ingredients = leftover_ingredients.split(",")
+        suggestions = suggest_leftover_recipes_gemini(ingredients)
+        for suggestion in suggestions:
+            st.write(f"- **{suggestion['name']}**: {suggestion['recipe']}")
+elif menu_option == "Display Leaderboard":
+    st.header("Leaderboard")
+    display_leaderboard_from_csv("recipe_contest_results.csv")
