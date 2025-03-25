@@ -77,7 +77,7 @@ def generate_recipe():
     """
     try:
         model = genai.GenerativeModel("gemini-1.5-pro")
-        response = model.generate_text(prompt)
+        response = model.generate_content(prompt)
         result = response.result.strip()
         return eval(result)  # Convert JSON-like string to Python dictionary
     except Exception as e:
