@@ -63,6 +63,54 @@ def load_results_from_csv(filename="recipe_contest_results.csv"):
     else:
         return pd.DataFrame(columns=["Chef Name", "Recipe Name", "Score", "Reason"])
 
+# Function to dynamically generate a recipe
+def generate_recipe():
+    prompt = """
+    You are a world-class chef. Generate a recipe with:
+    - A unique name for the dish.
+    - A list of 5 to 7 essential ingredients.
+    Output the response in JSON format:
+    {
+        "name": "<Dish Name>",
+        "ingredients": ["<Ingredient 1>", "<Ingredient 2>", "..."]
+    }
+    """
+    try:
+        model = genai.GenerativeModel("gemini-1.5-pro")
+        response = model.generate_text(prompt)
+        result = response.result.strip()
+        return eval(result)  # Convert JSON-like string to Python dictionary
+    except Exception as e:
+        return {"error": f"AI Error: {str(e)}"}
+
+# Function to evaluate the user's ingredients
+def evaluate_ingredients(user_ingredients, correct_ingredients):
+    user_ingredients = [item.strip().lower() for item in user_ingredients]
+    correct_set = set(correct_ingredients)
+    user_set = set(user_ingredients)
+
+    score = len(user_set & correct_set)  # Correct matches
+    missed = correct_set - user_set  # Missed ingredients
+    extra = user_set - correct_set  # Extra (wrong) ingredients
+
+    return {
+        "score": score,
+        "missed": list(missed),
+        "extra": list(extra),
+    }
+
+# Save results to a CSV file
+CSV_FILE = "chef_game_results.csv"
+
+def save_results(name, recipe, result):
+    file_exists = os.path.isfile(CSV_FILE)
+    with open(CSV_FILE, "a", newline="") as file:
+        writer = csv.writer(file)
+        if not file_exists:
+            writer.writerow(["Name", "Recipe", "Score", "Missed Ingredients", "Extra Ingredients"])
+        writer.writerow([name, recipe, result["score"], ", ".join(result["missed"]), ", ".join(result["extra"])])
+
+
 # Streamlit App
 def main():
     st.title("🍽️ AI Recipe Name Contest")
@@ -103,6 +151,47 @@ def main():
         st.dataframe(leaderboard)
     else:
         st.write("No results yet. Submit a recipe name to get started!")
+    
+    st.title("👩‍🍳 Chef Game with AI!")
+    st.write("Test your cooking knowledge by guessing the ingredients of an AI-generated recipe!")
+
+    # Generate a recipe name dynamically
+    st.subheader("AI-Generated Recipe Name")
+    recipe_data = generate_recipe()
+
+    if "error" in recipe_data:
+        st.error(recipe_data["error"])
+        st.stop()
+
+    recipe_name = recipe_data["name"]
+    correct_ingredients = recipe_data["ingredients"]
+
+    st.write(f"**Dish Name:** {recipe_name}")
+    st.write("Guess the ingredients for this recipe (provide at least 5 to match the AI's choices).")
+
+    user_name = st.text_input("Enter your name:")
+    user_input = st.text_area("Your ingredients (comma-separated):")
+
+    if st.button("Submit"):
+        if not user_name.strip() or not user_input.strip():
+            st.error("⚠️ Please provide your name and ingredients!")
+        else:
+            user_ingredients = user_input.split(",")
+            result = evaluate_ingredients(user_ingredients, correct_ingredients)
+
+            st.subheader("🎉 Results")
+            st.write(f"**Score:** {result['score']} / {len(correct_ingredients)}")
+            st.write(f"**Missed Ingredients:** {', '.join(result['missed']) if result['missed'] else 'None'}")
+            st.write(f"**Extra Ingredients:** {', '.join(result['extra']) if result['extra'] else 'None'}")
+
+            # Save results to a CSV file
+            save_results(user_name, recipe_name, result)
+            st.success("✅ Your results have been saved!")
+
+            # Display CSV download link
+            if os.path.isfile(CSV_FILE):
+                with open(CSV_FILE, "r") as file:
+                    st.download_button("📥 Download Results", file.read(), file_name=CSV_FILE
 
 if __name__ == "__main__":
     main()
