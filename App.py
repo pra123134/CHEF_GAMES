@@ -4,6 +4,8 @@ import random
 import csv
 import os
 import google.generativeai as genai
+import json
+
 
 # Configure API Key securely
 if "GOOGLE_API_KEY" in st.secrets:
