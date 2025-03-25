@@ -116,8 +116,8 @@ def main():
     st.title("🍽️ AI Recipe Name Contest")
     st.write("Compete to create the best recipe names!")
 
-    # Step 1: Collect inputs
-    st.header("Step 1: Enter Chef and Recipe Details")
+    # 1: Collect inputs
+    st.header("1: Enter Chef and Recipe Details")
     chefs = []
     recipe_data = {}
 
@@ -143,16 +143,17 @@ def main():
     if recipe_data:
         save_results_to_csv(recipe_data)
 
-    # Step 2: Display Leaderboard
-    st.header("Step 2: View Leaderboard")
+    # 2: Display Leaderboard
+    st.header("2: View Leaderboard")
     leaderboard = load_results_from_csv()
     if not leaderboard.empty:
         st.write("🏆 **Leaderboard** 🏆")
         st.dataframe(leaderboard)
     else:
         st.write("No results yet. Submit a recipe name to get started!")
-    
-    st.title("👩‍🍳 Chef Game with AI!")
+
+    # 3: Guess the Ingradient Game
+    st.header("3. 👩‍🍳 Chef Game with AI!")
     st.write("Test your cooking knowledge by guessing the ingredients of an AI-generated recipe!")
 
     # Generate a recipe name dynamically
