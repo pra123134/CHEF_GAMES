@@ -29,6 +29,11 @@ def evaluate_recipe_name(recipe_name):
         model = genai.GenerativeModel("gemini-1.5-pro")
         response = model.generate_content(prompt)
         response_text = response.text.strip()
+        
+        # Preprocess the response to remove surrounding backticks or formatting
+        if response_text.startswith("```") and response_text.endswith("```"):
+            response_text = response_text.strip("```").strip("json").strip()
+
         # Attempt to parse the response as JSON
         try:
             evaluation = json.loads(response_text)
