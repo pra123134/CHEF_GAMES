@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
-
 import streamlit as st
 import pandas as pd
 import random
@@ -33,10 +27,18 @@ def evaluate_recipe_name(recipe_name):
         model = genai.GenerativeModel("gemini-1.5-pro")
         response = model.generate_content(prompt)
         response_text = response.text.strip()
-        return eval(response_text)  # Convert AI response to dictionary
+        # Attempt to parse the response as JSON
+        try:
+            evaluation = json.loads(response_text)
+            if "score" in evaluation and "reason" in evaluation:
+                return evaluation
+            else:
+                return {"score": 0, "reason": "Invalid AI response format."}
+        except json.JSONDecodeError:
+            return {"score": 0, "reason": f"Failed to parse AI response as JSON: {response_text}"}
     except Exception as e:
         return {"score": 0, "reason": f"AI Error: {str(e)}"}
-
+       
 # Save results to a CSV file
 def save_results_to_csv(data, filename="recipe_contest_results.csv"):
     filepath = os.path.join(os.getcwd(), filename)
