@@ -94,6 +94,7 @@ def evaluate_recipe_name(recipe_name):
     try:
         response = model.generate_content(prompt)
         response_text = response.text.strip()
+        st.write(response_text)
         parts = response_text.split(",", 1)
         if len(parts) == 2:
             score = int(parts[0].strip())
