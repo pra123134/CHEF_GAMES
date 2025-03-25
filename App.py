@@ -62,7 +62,7 @@ def load_results_from_csv(filename="recipe_contest_results.csv"):
         return pd.read_csv(filepath)
     else:
         return pd.DataFrame(columns=["Chef Name", "Recipe Name", "Score", "Reason"])
-
+'''
 # Function to dynamically generate a recipe
 def generate_recipe():
     prompt = """
@@ -110,7 +110,7 @@ def save_results(name, recipe, result):
             writer.writerow(["Name", "Recipe", "Score", "Missed Ingredients", "Extra Ingredients"])
         writer.writerow([name, recipe, result["score"], ", ".join(result["missed"]), ", ".join(result["extra"])])
 
-
+'''
 # Streamlit App
 def main():
     st.title("🍽️ AI Recipe Name Contest")
