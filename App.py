@@ -193,7 +193,3 @@ def main():
             if os.path.isfile(CSV_FILE):
                 with open(CSV_FILE, "r") as file:
                     st.download_button("📥 Download Results", file.read(), file_name=CSV_FILE)
-
-if __name__ == "__main__":
-    main()
-
