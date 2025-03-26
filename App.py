@@ -111,84 +111,84 @@ def save_results(name, recipe, result):
         writer.writerow([name, recipe, result["score"], ", ".join(result["missed"]), ", ".join(result["extra"])])
 
 # Streamlit App
-def main():
-    st.title("🍽️ AI Recipe Name Contest")
-    st.write("Compete to create the best recipe names!")
+#def main():
+st.title("🍽️ AI Recipe Name Contest")
+st.write("Compete to create the best recipe names!")
 
-    # 1: Collect inputs
-    st.header("1: Enter Chef and Recipe Details")
-    chefs = []
-    recipe_data = {}
+# 1: Collect inputs
+st.header("1: Enter Chef and Recipe Details")
+chefs = []
+recipe_data = {}
 
-    chef_name = st.text_input("Enter Chef Name")
-    if chef_name:
-        ingredients = random.choice(["chicken, garlic, onion", "quinoa, spinach, avocado", "tofu, soy sauce, ginger"])
-        st.write(f"Your ingredients are: **{ingredients}**")
-        recipe_name = st.text_input("Enter Your Recipe Name")
+chef_name = st.text_input("Enter Chef Name")
+if chef_name:
+    ingredients = random.choice(["chicken, garlic, onion", "quinoa, spinach, avocado", "tofu, soy sauce, ginger"])
+    st.write(f"Your ingredients are: **{ingredients}**")
+    recipe_name = st.text_input("Enter Your Recipe Name")
 
-        # Evaluate recipe name
-        if st.button("Evaluate Recipe Name"):
-            with st.spinner("Evaluating recipe..."):
-                evaluation = evaluate_recipe_name(recipe_name)
-                recipe_data[chef_name] = {
-                    "recipe": recipe_name,
-                    "score": evaluation["score"],
-                    "reason": evaluation["reason"],
-                }
-                st.success(f"Score: {evaluation['score']}/10")
-                st.write(f"Reason: {evaluation['reason']}")
+    # Evaluate recipe name
+     if st.button("Evaluate Recipe Name"):
+        with st.spinner("Evaluating recipe..."):
+            evaluation = evaluate_recipe_name(recipe_name)
+            recipe_data[chef_name] = {
+                "recipe": recipe_name,
+                "score": evaluation["score"],
+                "reason": evaluation["reason"],
+            }
+            st.success(f"Score: {evaluation['score']}/10")
+            st.write(f"Reason: {evaluation['reason']}")
 
-    # Save results
-    if recipe_data:
-        save_results_to_csv(recipe_data)
+# Save results
+if recipe_data:
+    save_results_to_csv(recipe_data)
 
-    # 2: Display Leaderboard
-    st.header("2: View Leaderboard")
-    leaderboard = load_results_from_csv()
-    if not leaderboard.empty:
-        st.write("🏆 **Leaderboard** 🏆")
-        st.dataframe(leaderboard)
+# 2: Display Leaderboard
+st.header("2: View Leaderboard")
+leaderboard = load_results_from_csv()
+if not leaderboard.empty:
+    st.write("🏆 **Leaderboard** 🏆")
+    st.dataframe(leaderboard)
+else:
+    st.write("No results yet. Submit a recipe name to get started!")
+
+# 3: Guess the Ingradient Game
+st.header("3. 👩‍🍳 Chef Game with AI!")
+st.write("Test your cooking knowledge by guessing the ingredients of an AI-generated recipe!")
+
+# Generate a recipe name dynamically
+st.subheader("AI-Generated Recipe Name")
+recipe_data = generate_recipe()
+
+if "error" in recipe_data:
+    st.error(recipe_data["error"])
+    st.stop()
+
+recipe_name = recipe_data["name"]
+correct_ingredients = recipe_data["ingredients"]
+
+st.write(f"**Dish Name:** {recipe_name}")
+st.write("Guess the ingredients for this recipe (provide at least 5 to match the AI's choices).")
+
+user_name = st.text_input("Enter your name:")
+user_input = st.text_area("Your ingredients (comma-separated):")
+
+if st.button("Submit"):
+    if not user_name.strip() or not user_input.strip():
+        st.error("⚠️ Please provide your name and ingredients!")
     else:
-        st.write("No results yet. Submit a recipe name to get started!")
+        user_ingredients = user_input.split(",")
+        result = evaluate_ingredients(user_ingredients, correct_ingredients)
 
-    # 3: Guess the Ingradient Game
-    st.header("3. 👩‍🍳 Chef Game with AI!")
-    st.write("Test your cooking knowledge by guessing the ingredients of an AI-generated recipe!")
+        st.subheader("🎉 Results")
+        st.write(f"**Score:** {result['score']} / {len(correct_ingredients)}")
+        st.write(f"**Missed Ingredients:** {', '.join(result['missed']) if result['missed'] else 'None'}")
+        st.write(f"**Extra Ingredients:** {', '.join(result['extra']) if result['extra'] else 'None'}")
 
-    # Generate a recipe name dynamically
-    st.subheader("AI-Generated Recipe Name")
-    recipe_data = generate_recipe()
+        # Save results to a CSV file
+        save_results(user_name, recipe_name, result)
+        st.success("✅ Your results have been saved!")
 
-    if "error" in recipe_data:
-        st.error(recipe_data["error"])
-        st.stop()
-
-    recipe_name = recipe_data["name"]
-    correct_ingredients = recipe_data["ingredients"]
-
-    st.write(f"**Dish Name:** {recipe_name}")
-    st.write("Guess the ingredients for this recipe (provide at least 5 to match the AI's choices).")
-
-    user_name = st.text_input("Enter your name:")
-    user_input = st.text_area("Your ingredients (comma-separated):")
-
-    if st.button("Submit"):
-        if not user_name.strip() or not user_input.strip():
-            st.error("⚠️ Please provide your name and ingredients!")
-        else:
-            user_ingredients = user_input.split(",")
-            result = evaluate_ingredients(user_ingredients, correct_ingredients)
-
-            st.subheader("🎉 Results")
-            st.write(f"**Score:** {result['score']} / {len(correct_ingredients)}")
-            st.write(f"**Missed Ingredients:** {', '.join(result['missed']) if result['missed'] else 'None'}")
-            st.write(f"**Extra Ingredients:** {', '.join(result['extra']) if result['extra'] else 'None'}")
-
-            # Save results to a CSV file
-            save_results(user_name, recipe_name, result)
-            st.success("✅ Your results have been saved!")
-
-            # Display CSV download link
-            if os.path.isfile(CSV_FILE):
-                with open(CSV_FILE, "r") as file:
-                    st.download_button("📥 Download Results", file.read(), file_name=CSV_FILE)
+        # Display CSV download link
+        if os.path.isfile(CSV_FILE):
+            with open(CSV_FILE, "r") as file:
+                st.download_button("📥 Download Results", file.read(), file_name=CSV_FILE)
