@@ -130,7 +130,7 @@ if chef_name:
     recipe_name = st.text_input("Enter Your Recipe Name")
 
     # Evaluate recipe name
-     if st.button("Evaluate Recipe Name"):
+    if st.button("Evaluate Recipe Name"):
         with st.spinner("Evaluating recipe..."):
             evaluation = evaluate_recipe_name(recipe_name)
             recipe_data[chef_name] = {
