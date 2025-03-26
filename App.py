@@ -5,7 +5,7 @@ import csv
 import os
 import google.generativeai as genai
 import json
-
+from datetime import datetime
 
 # Configure API Key securely
 if "GOOGLE_API_KEY" in st.secrets:
@@ -49,9 +49,12 @@ def evaluate_recipe_name(recipe_name):
 # Save results to a CSV file
 def save_results_to_csv(data, filename="recipe_contest_results.csv"):
     filepath = os.path.join(os.getcwd(), filename)
+    file_exists = os.path.isfile(filepath)
     with open(filepath, "w", newline="", encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(["Chef Name", "Recipe Name", "Score", "Reason"])
+        # Write header only if file doesn't exist
+        if not file_exists:
+            writer.writerow(["Chef Name", "Recipe Name", "Score", "Reason"])
         for chef, details in data.items():
             writer.writerow([chef, details["recipe"], details["score"], details["reason"]])
 
