@@ -50,7 +50,7 @@ def evaluate_recipe_name(recipe_name):
 def save_game_results_to_csv(recipe_names, filename):
     filepath = os.path.join(os.getcwd(), filename)
     current_date = datetime.date.today().strftime("%Y-%m-%d")
-     try:
+    try:
         file_exists = os.path.isfile(filepath)  # Check if file exists
 
         with open(filepath, "a", newline="", encoding="utf-8") as csvfile:
@@ -199,14 +199,14 @@ if recipe_data:
 # 2: Display Leaderboard
 st.header("2: View Leaderboard")
 display_leaderboard_from_csv("recipe_contest_results.csv")
-'''
+
 leaderboard = load_results_from_csv()
 if not leaderboard.empty:
     st.write("🏆 **Leaderboard** 🏆")
     st.dataframe(leaderboard)
 else:
     st.write("No results yet. Submit a recipe name to get started!")
-'''
+
 # 3: Guess the Ingradient Game
 st.header("3. 👩‍🍳 Chef Game with AI!")
 st.write("Test your cooking knowledge by guessing the ingredients of an AI-generated recipe!")
