@@ -47,17 +47,29 @@ def evaluate_recipe_name(recipe_name):
         return {"score": 0, "reason": f"AI Error: {str(e)}"}
        
 # Save results to a CSV file
-def save_results_to_csv(data, filename="recipe_contest_results.csv"):
+def save_game_results_to_csv(recipe_names, filename):
     filepath = os.path.join(os.getcwd(), filename)
-    file_exists = os.path.isfile(filepath)
-    with open(filepath, "w", newline="", encoding="utf-8") as csvfile:
-        writer = csv.writer(csvfile)
-        # Write header only if file doesn't exist
-        if not file_exists:
-            writer.writerow(["Chef Name", "Recipe Name", "Score", "Reason"])
-        for chef, details in data.items():
-            writer.writerow([chef, details["recipe"], details["score"], details["reason"]])
-            
+    current_date = datetime.date.today().strftime("%Y-%m-%d")
+     try:
+        file_exists = os.path.isfile(filepath)  # Check if file exists
+
+        with open(filepath, "a", newline="", encoding="utf-8") as csvfile:
+            writer = csv.writer(csvfile)
+
+            # Write header only if file doesn't exist (prevents duplicates)
+            if not file_exists:
+                writer.writerow(["Chef Name", "Recipe Name", "Score", "Reason", "Ingredients", "Date"])
+
+            # Write new data
+            for chef, data in recipe_names.items():
+                writer.writerow([chef, data["recipe"], data["score"], data["reason"], data["ingredients"], current_date])
+
+        print(f"Data successfully saved to {filename}")
+    except FileNotFoundError:
+        print(f"Error: The file {filename} was not found.")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        
 
 # Load results from CSV for leaderboard
 def load_results_from_csv(filename="recipe_contest_results.csv"):
@@ -72,11 +84,19 @@ def display_leaderboard_from_csv(filename):
     filepath = os.path.join(os.getcwd(), filename)
     try:
         df = pd.read_csv(filepath)
+        st.write("🏆 **Leaderboard** 🏆")
+        st.dataframe(df)
+    except FileNotFoundError:
+        st.error("Leaderboard file not found.")
+    '''
+    filepath = os.path.join(os.getcwd(), filename)
+    try:
+        df = pd.read_csv(filepath)
         st.write("### Leaderboard")
         st.dataframe(df)
     except FileNotFoundError:
         st.error("Leaderboard file not found.")
-        
+    '''    
 # Function to declare winners
 def declare_winners(df):
     if df.empty:
@@ -178,13 +198,15 @@ if recipe_data:
 
 # 2: Display Leaderboard
 st.header("2: View Leaderboard")
+display_leaderboard_from_csv("recipe_contest_results.csv")
+'''
 leaderboard = load_results_from_csv()
 if not leaderboard.empty:
     st.write("🏆 **Leaderboard** 🏆")
     st.dataframe(leaderboard)
 else:
     st.write("No results yet. Submit a recipe name to get started!")
-
+'''
 # 3: Guess the Ingradient Game
 st.header("3. 👩‍🍳 Chef Game with AI!")
 st.write("Test your cooking knowledge by guessing the ingredients of an AI-generated recipe!")
