@@ -57,6 +57,7 @@ def save_results_to_csv(data, filename="recipe_contest_results.csv"):
             writer.writerow(["Chef Name", "Recipe Name", "Score", "Reason"])
         for chef, details in data.items():
             writer.writerow([chef, details["recipe"], details["score"], details["reason"]])
+            
 
 # Load results from CSV for leaderboard
 def load_results_from_csv(filename="recipe_contest_results.csv"):
@@ -65,6 +66,36 @@ def load_results_from_csv(filename="recipe_contest_results.csv"):
         return pd.read_csv(filepath)
     else:
         return pd.DataFrame(columns=["Chef Name", "Recipe Name", "Score", "Reason"])
+
+
+def display_leaderboard_from_csv(filename):
+    filepath = os.path.join(os.getcwd(), filename)
+    try:
+        df = pd.read_csv(filepath)
+        st.write("### Leaderboard")
+        st.dataframe(df)
+    except FileNotFoundError:
+        st.error("Leaderboard file not found.")
+        
+# Function to declare winners
+def declare_winners(df):
+    if df.empty:
+        return "No data available for winners."
+    
+    df['Date'] = pd.to_datetime(df['Date'])
+    df['Week'] = df['Date'].dt.strftime('%Y-%U')  # Year-Week format
+    df['Month'] = df['Date'].dt.strftime('%Y-%m')  # Year-Month format
+    
+    # Get highest scorer per day, week, and month
+    daily_winner = df.loc[df.groupby('Date')['Score'].idxmax()]
+    weekly_winner = df.loc[df.groupby('Week')['Score'].idxmax()]
+    monthly_winner = df.loc[df.groupby('Month')['Score'].idxmax()]
+    
+    return {
+        "Daily Winner": daily_winner[['Chef Name', 'Recipe Name', 'Score', 'Date']].to_dict(orient='records'),
+        "Weekly Winner": weekly_winner[['Chef Name', 'Recipe Name', 'Score', 'Week']].to_dict(orient='records'),
+        "Monthly Winner": monthly_winner[['Chef Name', 'Recipe Name', 'Score', 'Month']].to_dict(orient='records')
+    }
 
 # Function to dynamically generate a recipe
 def generate_recipe():
