@@ -57,7 +57,7 @@ def save_game_results_to_csv(recipe_names, filename):
 '''
 
 # Save results to a CSV file
-def save_game_results_to_csv(recipe_names, filename):
+def save_game_results_to_csv(recipe_names, filename="recipe_contest_results.csv"):
     filepath = os.path.join(os.getcwd(), filename)
     current_date = datetime.date.today().strftime("%Y-%m-%d")
     try:
