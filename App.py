@@ -45,7 +45,7 @@ def evaluate_recipe_name(recipe_name):
             return {"score": 0, "reason": f"Failed to parse AI response as JSON: {response_text}"}
     except Exception as e:
         return {"score": 0, "reason": f"AI Error: {str(e)}"}
-
+'''
 def save_game_results_to_csv(recipe_names, filename):
     filepath = os.path.join(os.getcwd(), filename)
     current_date = datetime.date.today().strftime("%Y-%m-%d")
@@ -54,7 +54,7 @@ def save_game_results_to_csv(recipe_names, filename):
         writer.writerow(["Chef Name", "Recipe Name", "Score", "Reason", "Ingredients", "Date"])
         for chef, data in recipe_names.items():
             writer.writerow([chef, data["recipe"], data["score"], data["reason"], data["ingredients"], current_date])
-
+'''
 
 # Save results to a CSV file
 def save_game_results_to_csv(recipe_names, filename):
