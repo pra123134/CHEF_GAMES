@@ -48,10 +48,14 @@ def evaluate_recipe_name(recipe_name):
 '''
 def save_game_results_to_csv(recipe_names, filename):
     filepath = os.path.join(os.getcwd(), filename)
-    current_date = datetime.date.today().strftime("%Y-%m-%d")
+    current_date = datetime.today().strftime("%Y-%m-%d")
     with open(filepath, "w", newline="", encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(["Chef Name", "Recipe Name", "Score", "Reason", "Ingredients", "Date"])
+        
+        # Write header only if file doesn't exist
+        if not file_exists:
+            writer.writerow(["Chef Name", "Recipe Name", "Score", "Reason", "Ingredients", "Date"])
+        
         for chef, data in recipe_names.items():
             writer.writerow([chef, data["recipe"], data["score"], data["reason"], data["ingredients"], current_date])
 '''
@@ -59,7 +63,7 @@ def save_game_results_to_csv(recipe_names, filename):
 # Save results to a CSV file
 def save_game_results_to_csv(recipe_names, filename="recipe_contest_results.csv"):
     filepath = os.path.join(os.getcwd(), filename)
-    current_date = datetime.date.today().strftime("%Y-%m-%d")
+    current_date = datetime.today().strftime("%Y-%m-%d")
     try:
         file_exists = os.path.isfile(filepath)  # Check if file exists
 
@@ -204,7 +208,7 @@ if chef_name:
 
 # Save results
 if recipe_data:
-    save_game_results_to_csv(recipe_data)
+    save_game_results_to_csv(recipe_data,"recipe_contest_results.csv")
 
 # 2: Display Leaderboard
 st.header("2: View Leaderboard")
