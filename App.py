@@ -243,9 +243,9 @@ if chef_name:
             st.success(f"Score: {evaluation['score']}/10")
             st.write(f"Reason: {evaluation['reason']}")
 
-# Save results
-if recipe_data:
-    save_game_results_to_csv(recipe_data,"recipe_contest_results.csv")
+    # Save results
+    if recipe_data:
+        save_game_results_to_csv(recipe_data,"recipe_contest_results.csv")
 
 # 2: Display Leaderboard
 st.header("2: View Leaderboard")
