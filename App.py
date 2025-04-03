@@ -118,7 +118,7 @@ def load_data():
     return df
 
 def get_winner(df, period):
-    today = datetime.today()
+    today = datetime.now()
     
     if period == "Day":
         start_date = today
