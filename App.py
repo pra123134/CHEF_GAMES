@@ -5,7 +5,7 @@ import csv
 import os
 import google.generativeai as genai
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Configure API Key securely
 if "GOOGLE_API_KEY" in st.secrets:
@@ -110,22 +110,24 @@ def declare_winners(df):
         "Monthly Winner": monthly_winner[['Chef Name', 'Recipe Name', 'Score', 'Month']].to_dict(orient='records')
     }
 
+
 # Load Data
 def load_data():
     file_path = "recipe_contest_results.csv"  # Ensure this file is in the same directory
     df = pd.read_csv(file_path)
-    df["Date"] = pd.to_datetime(df["Date"], format="%d-%m-%Y")  # Convert to datetime
+    df["Date"] = pd.to_datetime(df["Date"], format="%d-%m-%Y", errors='coerce')  # Convert to datetime safely
+    df = df.dropna(subset=["Date"])  # Drop rows with invalid dates
     return df
 
 def get_winner(df, period):
     today = datetime.now()
     
     if period == "Day":
-        start_date = today
+        start_date = today.replace(hour=0, minute=0, second=0, microsecond=0)
     elif period == "Week":
-        start_date = today - timedelta(days=7)
+        start_date = today - timedelta(days=today.weekday())  # Start of the week
     elif period == "Month":
-        start_date = today - timedelta(days=30)
+        start_date = today.replace(day=1)  # Start of the month
     else:
         return "Please select a valid period."
     
@@ -135,6 +137,7 @@ def get_winner(df, period):
     
     winner = recent_data.loc[recent_data["Score"].idxmax()]
     return f"🏆 Winner: {winner['Chef Name']} ({winner['Recipe Name']}) with Score: {winner['Score']}"
+
 
 # Function to dynamically generate a recipe
 def generate_recipe():
