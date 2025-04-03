@@ -45,20 +45,7 @@ def evaluate_recipe_name(recipe_name):
             return {"score": 0, "reason": f"Failed to parse AI response as JSON: {response_text}"}
     except Exception as e:
         return {"score": 0, "reason": f"AI Error: {str(e)}"}
-'''
-def save_game_results_to_csv(recipe_names, filename):
-    filepath = os.path.join(os.getcwd(), filename)
-    current_date = datetime.today().strftime("%Y-%m-%d")
-    with open(filepath, "w", newline="", encoding="utf-8") as csvfile:
-        writer = csv.writer(csvfile)
-        
-        # Write header only if file doesn't exist
-        if not file_exists:
-            writer.writerow(["Chef Name", "Recipe Name", "Score", "Reason", "Ingredients", "Date"])
-        
-        for chef, data in recipe_names.items():
-            writer.writerow([chef, data["recipe"], data["score"], data["reason"], data["ingredients"], current_date])
-'''
+
 
 # Save results to a CSV file
 def save_game_results_to_csv(recipe_names, filename="recipe_contest_results.csv"):
@@ -102,15 +89,7 @@ def display_leaderboard_from_csv(filename):
         st.dataframe(df)
     except FileNotFoundError:
         st.error("Leaderboard file not found.")
-    '''
-    filepath = os.path.join(os.getcwd(), filename)
-    try:
-        df = pd.read_csv(filepath)
-        st.write("### Leaderboard")
-        st.dataframe(df)
-    except FileNotFoundError:
-        st.error("Leaderboard file not found.")
-    '''    
+    
 # Function to declare winners
 def declare_winners(df):
     if df.empty:
@@ -130,6 +109,32 @@ def declare_winners(df):
         "Weekly Winner": weekly_winner[['Chef Name', 'Recipe Name', 'Score', 'Week']].to_dict(orient='records'),
         "Monthly Winner": monthly_winner[['Chef Name', 'Recipe Name', 'Score', 'Month']].to_dict(orient='records')
     }
+
+# Load Data
+def load_data():
+    file_path = "recipe_contest_results.csv"  # Ensure this file is in the same directory
+    df = pd.read_csv(file_path)
+    df["Date"] = pd.to_datetime(df["Date"], format="%d-%m-%Y")  # Convert to datetime
+    return df
+
+def get_winner(df, period):
+    today = datetime.today()
+    
+    if period == "Day":
+        start_date = today
+    elif period == "Week":
+        start_date = today - timedelta(days=7)
+    elif period == "Month":
+        start_date = today - timedelta(days=30)
+    else:
+        return "Please select a valid period."
+    
+    recent_data = df[df["Date"] >= start_date]
+    if recent_data.empty:
+        return "No winner available."
+    
+    winner = recent_data.loc[recent_data["Score"].idxmax()]
+    return f"🏆 Winner: {winner['Chef Name']} ({winner['Recipe Name']}) with Score: {winner['Score']}"
 
 # Function to dynamically generate a recipe
 def generate_recipe():
@@ -212,15 +217,34 @@ if recipe_data:
 
 # 2: Display Leaderboard
 st.header("2: View Leaderboard")
-display_leaderboard_from_csv("recipe_contest_results.csv")
 
+# Show leaderboard file
+    if st.button("Display the scores"):
+        display_leaderboard_from_csv("recipe_contest_results.csv")
+
+'''
 leaderboard = load_results_from_csv()
 if not leaderboard.empty:
     st.write("🏆 **Leaderboard** 🏆")
     st.dataframe(leaderboard)
 else:
     st.write("No results yet. Submit a recipe name to get started!")
+'''
 
+st.title("🍽️ Recipe Contest - Winner Announcer")
+
+# Load data
+df = load_data()
+
+# Dropdown for selection
+period = st.selectbox("Select period:", ["Day", "Week", "Month"])
+
+# Button to display winner
+if st.button("Show Winner"):
+    result = get_winner(df, period)
+    st.subheader(f"🏆 Winner for {period}")
+    st.write(result)
+    
 # 3: Guess the Ingradient Game
 st.header("3. 👩‍🍳 Chef Game with AI!")
 st.write("Test your cooking knowledge by guessing the ingredients of an AI-generated recipe!")
