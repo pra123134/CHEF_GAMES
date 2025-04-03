@@ -132,6 +132,8 @@ def get_winner(df, period):
         return "Please select a valid period."
     
     recent_data = df[df["Date"] >= start_date]
+    print("Debug: Recipe Names Dictionary:", recipe_names)
+
     if recent_data.empty:
         return "No winner available."
     
