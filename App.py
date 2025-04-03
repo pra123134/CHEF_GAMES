@@ -94,8 +94,15 @@ def display_leaderboard_from_csv(filename):
     filepath = os.path.join(os.getcwd(), filename)
     try:
         df = pd.read_csv(filepath)
+        # Get the highest score
+        highest_score = df["Score"].max()
+
+        # Filter only top scorers (those with the highest score)
+        top_scorers = df[df["Score"] == highest_score]
+
         st.write("🏆 **Leaderboard** 🏆")
-        st.dataframe(df)
+        st.dataframe(top_scorers)
+        
     except FileNotFoundError:
         st.error("Leaderboard file not found.")
     
@@ -126,6 +133,8 @@ def load_data():
     df = pd.read_csv(file_path)
     df["Date"] = pd.to_datetime(df["Date"], format="%d-%m-%Y", errors='coerce')  # Convert to datetime safely
     df = df.dropna(subset=["Date"])  # Drop rows with invalid dates
+    df["Score"] = pd.to_numeric(df["Score"], errors='coerce')  # Ensure Score is numeric
+    df = df.dropna(subset=["Score"])  # Remove rows with NaN scores
     return df
 
 def get_winner(df, period):
@@ -249,6 +258,9 @@ st.title("🍽️ Recipe Contest - Winner Announcer")
 
 # Load data
 df = load_data()
+# Debugging output
+st.write("### Debug: Data Preview")
+st.write(df.head())
 
 # Dropdown for selection
 period = st.selectbox("Select period:", ["Day", "Week", "Month"])
