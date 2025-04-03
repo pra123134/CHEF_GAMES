@@ -94,17 +94,26 @@ def display_leaderboard_from_csv(filename):
     filepath = os.path.join(os.getcwd(), filename)
     try:
         df = pd.read_csv(filepath)
-        # Get the highest score
-        highest_score = df["Score"].max()
+        if df.empty:
+            st.warning("Leaderboard is empty.")
+            return
 
-        # Filter only top scorers (those with the highest score)
-        top_scorers = df[df["Score"] == highest_score]
+        # Ensure "Date" column is in datetime format
+        df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
+
+        # Ensure "Score" column is numeric
+        df["Score"] = pd.to_numeric(df["Score"], errors="coerce")
+
+        # Sort by Date (latest first), then by Score (highest first)
+        df = df.sort_values(by=["Date", "Score"], ascending=[False, False])
 
         st.write("🏆 **Leaderboard** 🏆")
-        st.dataframe(top_scorers)
-        
+        st.dataframe(df)
+
     except FileNotFoundError:
         st.error("Leaderboard file not found.")
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
     
 # Function to declare winners
 def declare_winners(df):
