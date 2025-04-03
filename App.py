@@ -254,15 +254,6 @@ st.header("2: View Leaderboard")
 if st.button("Display the scores"):
     display_leaderboard_from_csv("recipe_contest_results.csv")
 
-'''
-leaderboard = load_results_from_csv()
-if not leaderboard.empty:
-    st.write("🏆 **Leaderboard** 🏆")
-    st.dataframe(leaderboard)
-else:
-    st.write("No results yet. Submit a recipe name to get started!")
-'''
-
 st.title("🍽️ Recipe Contest - Winner Announcer")
 
 # Load data
