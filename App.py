@@ -219,8 +219,8 @@ if recipe_data:
 st.header("2: View Leaderboard")
 
 # Show leaderboard file
-    if st.button("Display the scores"):
-        display_leaderboard_from_csv("recipe_contest_results.csv")
+if st.button("Display the scores"):
+    display_leaderboard_from_csv("recipe_contest_results.csv")
 
 '''
 leaderboard = load_results_from_csv()
