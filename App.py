@@ -47,10 +47,10 @@ def evaluate_recipe_name(recipe_name):
         return {"score": 0, "reason": f"AI Error: {str(e)}"}
 
 
-# Save results to a CSV file
 def save_game_results_to_csv(recipe_names, filename="recipe_contest_results.csv"):
     filepath = os.path.join(os.getcwd(), filename)
     current_date = datetime.today().strftime("%Y-%m-%d")
+
     try:
         file_exists = os.path.isfile(filepath)  # Check if file exists
 
@@ -61,11 +61,20 @@ def save_game_results_to_csv(recipe_names, filename="recipe_contest_results.csv"
             if not file_exists:
                 writer.writerow(["Chef Name", "Recipe Name", "Score", "Reason", "Ingredients", "Date"])
 
+            # Debug: Print before writing
+            print("Debug: Recipe Names Dictionary:", recipe_names)
+
             # Write new data
             for chef, data in recipe_names.items():
+                print(f"Writing Data: {chef}, {data}")  # Debugging
                 writer.writerow([chef, data["recipe"], data["score"], data["reason"], data["ingredients"], current_date])
 
+            # Force writing to file
+            csvfile.flush()
+            csvfile.close()
+
         print(f"Data successfully saved to {filename}")
+
     except FileNotFoundError:
         print(f"Error: The file {filename} was not found.")
     except Exception as e:
