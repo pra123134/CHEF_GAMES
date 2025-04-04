@@ -148,6 +148,8 @@ def load_data():
 
 def get_winner(df, period):
     today = datetime.now()
+    st.write(df.head())
+    st.write(period)
     
     if period == "Day":
         start_date = today.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -159,8 +161,7 @@ def get_winner(df, period):
         return "Please select a valid period."
     
     recent_data = df[df["Date"] >= start_date]
-    print("Debug: Recipe Names Dictionary:", recipe_names)
-
+   
     if recent_data.empty:
         return "No winner available."
     
@@ -259,8 +260,8 @@ st.title("🍽️ Recipe Contest - Winner Announcer")
 # Load data
 df = load_data()
 # Debugging output
-st.write("### Debug: Data Preview")
-st.write(df.head())
+#st.write("### Debug: Data Preview")
+#st.write(df.head())
 
 # Dropdown for selection
 period = st.selectbox("Select period:", ["Day", "Week", "Month"])
