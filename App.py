@@ -119,23 +119,34 @@ def display_leaderboard_from_csv(filename):
 def declare_winners(df):
     if df.empty:
         return "No data available for winners."
-    
+    st.write(df.head())
     df['Date'] = pd.to_datetime(df['Date'])
     df['Week'] = df['Date'].dt.strftime('%Y-%U')  # Year-Week format
     df['Month'] = df['Date'].dt.strftime('%Y-%m')  # Year-Month format
+    df['Score'] = pd.to_numeric(df['Score'], errors='coerce')  # Ensure Score is numeric
+    
+    # Sort before idxmax() to get consistent results in case of ties
+    df = df.sort_values(by=['Score', 'Date'], ascending=[False, True])
     
     # Get highest scorer per day, week, and month
-    daily_winner = df.loc[df.groupby('Date')['Score'].idxmax()]
-    weekly_winner = df.loc[df.groupby('Week')['Score'].idxmax()]
-    monthly_winner = df.loc[df.groupby('Month')['Score'].idxmax()]
-    
+    daily_winner = df.loc[df.groupby('Date')['Score'].idxmax().dropna()]
+    weekly_winner = df.loc[df.groupby('Week')['Score'].idxmax().dropna()]
+    monthly_winner = df.loc[df.groupby('Month')['Score'].idxmax().dropna()]
+
+    # Display Winners
     st.subheader("🏆 Contest Winners")
-    st.write("### Daily Winner")
-    st.dataframe(daily_winner[['Chef Name', 'Recipe Name', 'Score', 'Date']])
-    st.write("### Weekly Winner")
-    st.dataframe(weekly_winner[['Chef Name', 'Recipe Name', 'Score', 'Week']])
-    st.write("### Monthly Winner")
-    st.dataframe(monthly_winner[['Chef Name', 'Recipe Name', 'Score', 'Month']])
+    
+    if not daily_winner.empty:
+        st.write("### Daily Winner")
+        st.dataframe(daily_winner[['Chef Name', 'Recipe Name', 'Score', 'Date']])
+    
+    if not weekly_winner.empty:
+        st.write("### Weekly Winner")
+        st.dataframe(weekly_winner[['Chef Name', 'Recipe Name', 'Score', 'Week']])
+    
+    if not monthly_winner.empty:
+        st.write("### Monthly Winner")
+        st.dataframe(monthly_winner[['Chef Name', 'Recipe Name', 'Score', 'Month']])
 
 
 # Load Data
