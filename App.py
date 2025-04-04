@@ -159,11 +159,12 @@ def get_winner(df, period):
         return "Please select a valid period."
     st.write(start_date)
     recent_data = df[df["Date"] >= start_date]
-    st.write(start_date)
+    st.write(recent_data)
     if recent_data.empty:
         return "No winner available."
     
     winner = recent_data.loc[recent_data["Score"].idxmax()]
+    st.write(f"🏆 Winner: {winner['Chef Name']} ({winner['Recipe Name']}) with Score: {winner['Score']}")
     return f"🏆 Winner: {winner['Chef Name']} ({winner['Recipe Name']}) with Score: {winner['Score']}"
 
 
