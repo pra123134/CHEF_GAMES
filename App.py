@@ -129,11 +129,13 @@ def declare_winners(df):
     weekly_winner = df.loc[df.groupby('Week')['Score'].idxmax()]
     monthly_winner = df.loc[df.groupby('Month')['Score'].idxmax()]
     
-    return {
-        "Daily Winner": daily_winner[['Chef Name', 'Recipe Name', 'Score', 'Date']].to_dict(orient='records'),
-        "Weekly Winner": weekly_winner[['Chef Name', 'Recipe Name', 'Score', 'Week']].to_dict(orient='records'),
-        "Monthly Winner": monthly_winner[['Chef Name', 'Recipe Name', 'Score', 'Month']].to_dict(orient='records')
-    }
+    st.subheader("🏆 Contest Winners")
+    st.write("### Daily Winner")
+    st.dataframe(daily_winner[['Chef Name', 'Recipe Name', 'Score', 'Date']])
+    st.write("### Weekly Winner")
+    st.dataframe(weekly_winner[['Chef Name', 'Recipe Name', 'Score', 'Week']])
+    st.write("### Monthly Winner")
+    st.dataframe(monthly_winner[['Chef Name', 'Recipe Name', 'Score', 'Month']])
 
 
 # Load Data
@@ -267,9 +269,10 @@ period = st.selectbox("Select period:", ["Day", "Week", "Month"])
 
 # Button to display winner
 if st.button("Show Winner"):
-    result = get_winner(df, period)
+    #result = get_winner(df, period)
     st.subheader(f"🏆 Winner for {period}")
-    st.write(result)
+   # st.write(result)
+   declare_winners(df)
     
 # 3: Guess the Ingradient Game
 st.header("3. 👩‍🍳 Chef Game with AI!")
