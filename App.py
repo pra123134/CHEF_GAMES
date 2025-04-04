@@ -271,8 +271,8 @@ period = st.selectbox("Select period:", ["Day", "Week", "Month"])
 if st.button("Show Winner"):
     #result = get_winner(df, period)
     st.subheader(f"🏆 Winner for {period}")
-   # st.write(result)
-   declare_winners(df)
+    # st.write(result)
+    declare_winners(df)
     
 # 3: Guess the Ingradient Game
 st.header("3. 👩‍🍳 Chef Game with AI!")
