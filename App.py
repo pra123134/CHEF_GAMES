@@ -148,9 +148,7 @@ def load_data():
 
 def get_winner(df, period):
     today = datetime.now()
-    st.write(df.head())
-    st.write(period)
-    
+       
     if period == "Day":
         start_date = today.replace(hour=0, minute=0, second=0, microsecond=0)
     elif period == "Week":
@@ -159,9 +157,9 @@ def get_winner(df, period):
         start_date = today.replace(day=1)  # Start of the month
     else:
         return "Please select a valid period."
-    
+    st.write(start_date)
     recent_data = df[df["Date"] >= start_date]
-   
+    st.write(start_date)
     if recent_data.empty:
         return "No winner available."
     
