@@ -119,7 +119,7 @@ def display_leaderboard_from_csv(filename):
 def declare_winners(df):
     if df.empty:
         return "No data available for winners."
-    st.write(df.head())
+    
     df['Date'] = pd.to_datetime(df['Date'])
     df['Week'] = df['Date'].dt.strftime('%Y-%U')  # Year-Week format
     df['Month'] = df['Date'].dt.strftime('%Y-%m')  # Year-Month format
@@ -274,9 +274,6 @@ df = load_data()
 # Debugging output
 #st.write("### Debug: Data Preview")
 #st.write(df.head())
-
-# Dropdown for selection
-period = st.selectbox("Select period:", ["Day", "Week", "Month"])
 
 # Button to display winner
 if st.button("Show Winner"):
