@@ -274,14 +274,13 @@ df = load_data()
 # Debugging output
 #st.write("### Debug: Data Preview")
 #st.write(df.head())
+period = st.selectbox("Select time period for winner announcement:", ["Day", "Week", "Month"])
 
-# Button to display winner
 if st.button("Show Winner"):
-    #result = get_winner(df, period)
-    st.subheader(f"🏆 Winner for {period}")
-    # st.write(result)
+    result = get_winner(df, period)
+    st.subheader(result)
     declare_winners(df)
-    
+
 # 3: Guess the Ingradient Game
 st.header("3. 👩‍🍳 Chef Game with AI!")
 st.write("Test your cooking knowledge by guessing the ingredients of an AI-generated recipe!")
